@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DedeDogBurger - Smash Burgers Artesanais</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        deepblack: '#0F0C0B', // Preto Profundo
+                        burntorange: '#F7921E', // Laranja Queimado
+                        snowwhite: '#FFFFFF', // Branco Neve
+                        graphite: '#2D2D2D', // Cinza Grafite
+                        goldyellow: '#F9D342' // Amarelo Ouro
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        display: ['Bebas Neue', 'cursive']
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;700&display=swap');
+        
+        .hero {
+            background-image: linear-gradient(rgba(15, 12, 11, 0.8), rgba(15, 12, 11, 0.8)), url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1998&q=80');
+            background-size: cover;
+            background-position: center;
+            min-height: 70vh;
+        }
+        
+        .menu-item {
+            transition: all 0.3s ease;
+            border: 2px solid rgba(247, 146, 30, 0.2);
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(247, 146, 30, 0.2);
+            border-color: rgba(247, 146, 30, 0.5);
+        }
+        
+        .floating-button {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .instagram-feed {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .price-tag {
+            background-color: #F7921E;
+            color: #0F0C0B;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            bottom: -8px;
+            left: 25%;
+            background-color: #F7921E;
+        }
+
+        /* Carrinho de Compras */
+        .cart-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background-color: #0F0C0B;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            border-left: 2px solid #F7921E;
+        }
+
+        .cart-panel.open {
+            right: 0;
+        }
+
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .cart-overlay.active {
+            display: block;
+        }
+
+        .cart-item-quantity {
+            width: 50px;
+            text-align: center;
+            background-color: #2D2D2D;
+            color: white;
+            border: 1px solid #F7921E;
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .remove-item {
+            color: #F7921E;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .remove-item:hover {
+            color: #F9D342;
+        }
+
+        .address-form input, .address-form textarea {
+            background-color: #2D2D2D;
+            border: 1px solid #F7921E;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .address-form input:focus, .address-form textarea:focus {
+            outline: none;
+            border-color: #F9D342;
+        }
+    </style>
+</head>
+<body class="bg-deepblack font-sans text-snowwhite">
+    <!-- Header/Navigation -->
+    <header class="bg-deepblack text-snowwhite sticky top-0 z-50 shadow-md border-b border-burntorange/30">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="https://via.placeholder.com/50x50" alt="DedeDogBurger Logo" class="h-10 w-10 rounded-full mr-2 border-2 border-burntorange">
+                <h1 class="text-2xl font-display tracking-wider text-goldyellow">DEDEDOGBURGER</h1>
+            </div>
+            <nav class="hidden md:block">
+                <ul class="flex space-x-8">
+                    <li><a href="#home" class="hover:text-burntorange transition">Home</a></li>
+                    <li><a href="#menu" class="hover:text-burntorange transition">Cardápio</a></li>
+                    <li><a href="#about" class="hover:text-burntorange transition">Sobre</a></li>
+                    <li><a href="#gallery" class="hover:text-burntorange transition">Fotos</a></li>
+                    <li><a href="#contact" class="hover:text-burntorange transition">Contato</a></li>
+                </ul>
+            </nav>
+            <button id="cart-toggle" class="relative md:ml-4">
+                <i class="fas fa-shopping-cart text-2xl text-goldyellow"></i>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-burntorange text-deepblack rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Carrinho de Compras -->
+    <div id="cart-overlay" class="cart-overlay"></div>
+    <div id="cart-panel" class="cart-panel">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6 border-b border-burntorange/30 pb-4">
+                <h2 class="text-2xl font-display text-goldyellow">SEU PEDIDO</h2>
+                <button id="close-cart" class="text-burntorange hover:text-goldyellow text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="cart-items" class="mb-6">
+                <!-- Itens do carrinho serão adicionados aqui dinamicamente -->
+                <p class="text-center py-4">Seu carrinho está vazio</p>
+            </div>
+            
+            <div class="border-t border-b border-burntorange/30 py-4 mb-4">
+                <div class="flex justify-between mb-2">
+                    <span>Subtotal:</span>
+                    <span id="cart-subtotal">R$ 0,00</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span>Taxa de entrega:</span>
+                    <span id="delivery-fee">R$ 5,00</span>
+                </div>
+                <div class="flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span id="cart-total">R$ 5,00</span>
+                </div>
+            </div>
+            
+            <div id="address-form" class="address-form mb-6">
+                <h3 class="text-xl font-bold mb-3 text-burntorange">Informações de Entrega</h3>
+                <input type="text" id="customer-name" placeholder="Seu nome" required>
+                <input type="tel" id="customer-phone" placeholder="Seu telefone" required>
+                <textarea id="customer-address" rows="3" placeholder="Endereço completo (Rua, número, bairro, complemento)" required></textarea>
+                <textarea id="customer-notes" rows="2" placeholder="Observações (opcional)"></textarea>
+            </div>
+            
+            <button id="checkout-btn" class="w-full bg-goldyellow text-deepblack py-3 rounded-full font-bold hover:bg-burntorange transition flex items-center justify-center">
+                <i class="fab fa-whatsapp mr-2"></i> Finalizar Pedido via WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero flex items-center justify-center text-center text-snowwhite">
+        <div class="container mx-auto px-4 py-20">
+            <h1 class="text-5xl md:text-7xl font-display tracking-wider mb-4 text-goldyellow">DEDEDOGBURGER</h1>
+            <p class="text-xl md:text-2xl mb-8">🍔 Burgers Artesanais | 🌭 Cachorro Quente Especial</p>
+            <div class="bg-burntorange/90 inline-block px-6 py-3 rounded-full">
+                <p class="text-lg font-semibold text-deepblack">🕰️ Quarta-Domingo 17:00-23:00</p>
+            </div>
+            <div class="mt-8">
+                <a href="#menu" class="bg-goldyellow text-deepblack px-8 py-3 rounded-full font-bold hover:bg-burntorange transition inline-block mr-4">Ver Cardápio</a>
+                <a href="#contact" class="border-2 border-goldyellow text-snowwhite px-8 py-3 rounded-full font-bold hover:bg-goldyellow hover:text-deepblack transition inline-block">Como Chegar</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="py-16 bg-deepblack">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-display text-center mb-12 section-title text-goldyellow">NOSSO CARDÁPIO</h2>
+            
+            <!-- Burgers Section -->
+            <div class="mb-16">
+                <h3 class="text-3xl font-display mb-8 text-center text-burntorange border-b border-burntorange/30 pb-2 inline-block">BURGUERS ARTESANAIS</h3>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- DEDÉ CLÁSSICO -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDÉ CLÁSSICO</h4>
+                            <span class="price-tag">R$17,90</span>
+                        </div>
+                        <p class="text-sm mb-4">Nosso tradicional cheese burguer</p>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• Hamburguer artesanal 150g</li>
+                            <li>• Queijo mussarela</li>
+                            <li>• Molho especial</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDÉ CLÁSSICO" 
+                                data-price="17.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- DEDÉ DO SERTÃO -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDÉ DO SERTÃO</h4>
+                            <span class="price-tag">R$24,90</span>
+                        </div>
+                        <p class="text-sm mb-4">O queridinho nordestino!</p>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• Carne de sol 150g</li>
+                            <li>• Queijo coalho duplo</li>
+                            <li>• Cebola roxa</li>
+                            <li>• Toque de manteiga de garrafa</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDÉ DO SERTÃO" 
+                                data-price="24.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- DEDÉ FURIOSO -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDÉ FURIOSO</h4>
+                            <span class="price-tag">R$23,90</span>
+                        </div>
+                        <p class="text-sm mb-4">Cheddar cremoso com muito bacon!</p>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• Hamburguer 150g</li>
+                            <li>• Cheddar duplo</li>
+                            <li>• Bacon em tiras crocantes</li>
+                            <li>• Creme cheddar</li>
+                            <li>• Molho especial</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDÉ FURIOSO" 
+                                data-price="23.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- DEDÉ NATUREBA -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDÉ NATUREBA</h4>
+                            <span class="price-tag">R$17,90</span>
+                        </div>
+                        <p class="text-sm mb-4">Leve e saboroso!</p>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• Peito de frango grelhado</li>
+                            <li>• Mussarela em dobro</li>
+                            <li>• Salada</li>
+                            <li>• Molho especial</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDÉ NATUREBA" 
+                                data-price="17.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- DEDÉ BBQ -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDÉ BBQ</h4>
+                            <span class="price-tag">R$27,90</span>
+                        </div>
+                        <p class="text-sm mb-4">O sabor defumado que conquista!</p>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• Hamburguer artesanal 150g</li>
+                            <li>• Queijo cheddar</li>
+                            <li>• Bacon</li>
+                            <li>• Molho barbecue</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDÉ BBQ" 
+                                data-price="27.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- DEDÉ PICANHA -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDÉ PICANHA</h4>
+                            <span class="price-tag">R$31,90</span>
+                        </div>
+                        <p class="text-sm mb-4">O sabor do Brasil!</p>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• 150g de picanha fatiada</li>
+                            <li>• Creme cheddar</li>
+                            <li>• Duplo massaricado</li>
+                            <li>• Cebola grelhada</li>
+                            <li>• Molho BBQ</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDÉ PICANHA" 
+                                data-price="31.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- DEDE CABRA MACHO -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDE CABRA MACHO</h4>
+                            <span class="price-tag">R$22,90</span>
+                        </div>
+                        <p class="text-sm mb-4">Arretado no nome, valente no sabor!</p>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• Cheese calabresa apimentado!</li>
+                            <li>• Hamburguer 150g</li>
+                            <li>• Calabresa acebolada</li>
+                            <li>• Queijo mussarela</li>
+                            <li>• Molho especial</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDE CABRA MACHO" 
+                                data-price="22.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hot Dogs Section -->
+            <div class="mb-16">
+                <h3 class="text-3xl font-display mb-8 text-center text-burntorange border-b border-burntorange/30 pb-2 inline-block">CACHORROS QUENTES ESPECIAIS</h3>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- DEDÉ DOG TRADICIONAL -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDÉ DOG TRADICIONAL</h4>
+                            <span class="price-tag">R$9,90</span>
+                        </div>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• Salsicha</li>
+                            <li>• Carne moída temperada</li>
+                            <li>• Milho</li>
+                            <li>• Ervilha</li>
+                            <li>• Tomate</li>
+                            <li>• Batata palha</li>
+                            <li>• Queijo ralado</li>
+                            <li>• Molho especial</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDÉ DOG TRADICIONAL" 
+                                data-price="9.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- DEDÉ DOG CAIPIRA -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDÉ DOG CAIPIRA</h4>
+                            <span class="price-tag">R$11,90</span>
+                        </div>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• Salsicha</li>
+                            <li>• Frango desfiado</li>
+                            <li>• Milho</li>
+                            <li>• Ervilha</li>
+                            <li>• Tomate</li>
+                            <li>• Batata palha</li>
+                            <li>• Queijo ralado</li>
+                            <li>• Molho especial</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDÉ DOG CAIPIRA" 
+                                data-price="11.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- DEDÉ DOG SERTÃO -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-2xl font-bold">DEDÉ DOG SERTÃO</h4>
+                            <span class="price-tag">R$12,90</span>
+                        </div>
+                        <ul class="text-sm space-y-1 text-snowwhite/90">
+                            <li>• Salsicha</li>
+                            <li>• Charque desfiada</li>
+                            <li>• Milho</li>
+                            <li>• Ervilha</li>
+                            <li>• Tomate</li>
+                            <li>• Batata palha</li>
+                            <li>• Queijo ralado</li>
+                            <li>• Catupiry</li>
+                            <li>• Molho especial</li>
+                        </ul>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="DEDÉ DOG SERTÃO" 
+                                data-price="12.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sides Section -->
+            <div class="mb-16">
+                <h3 class="text-3xl font-display mb-8 text-center text-burntorange border-b border-burntorange/30 pb-2 inline-block">ACOMPANHAMENTOS</h3>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- BATATA FRITA -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-xl font-bold">BATATA FRITA</h4>
+                            <span class="price-tag">R$9,90</span>
+                        </div>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="BATATA FRITA" 
+                                data-price="9.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- BATATA FRITA COM CHEDDAR E BACON -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-xl font-bold">BATATA FRITA C/ CHEDDAR E BACON</h4>
+                            <span class="price-tag">R$14,90</span>
+                        </div>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="BATATA FRITA C/ CHEDDAR E BACON" 
+                                data-price="14.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- NUGGETS DE FRANGO -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-xl font-bold">NUGGETS DE FRANGO</h4>
+                            <span class="price-tag">R$11,90</span>
+                        </div>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="NUGGETS DE FRANGO" 
+                                data-price="11.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                    
+                    <!-- PORÇÃO DE MINI COXINHAS -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-xl font-bold">PORÇÃO DE MINI COXINHAS</h4>
+                            <span class="price-tag">R$12,90</span>
+                        </div>
+                        <button class="add-to-cart mt-4 w-full bg-burntorange text-deepblack py-2 rounded-full font-bold hover:bg-goldyellow transition" 
+                                data-name="PORÇÃO DE MINI COXINHAS" 
+                                data-price="12.90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Drinks Section -->
+            <div>
+                <h3 class="text-3xl font-display mb-8 text-center text-burntorange border-b border-burntorange/30 pb-2 inline-block">BEBIDAS</h3>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Refrigerantes -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <h4 class="text-xl font-bold mb-4 text-center">REFRIGERANTES</h4>
+                        <ul class="space-y-4">
+                            <li class="flex justify-between items-center">
+                                <span>Coca Cola 350ml</span>
+                                <span class="price-tag">R$5,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Coca Cola Zero 350ml</span>
+                                <span class="price-tag">R$5,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Guaraná Lata 350ml</span>
+                                <span class="price-tag">R$5,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Fanta Lata 350ml</span>
+                                <span class="price-tag">R$5,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Sprite Lata 350ml</span>
+                                <span class="price-tag">R$5,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Guaraná 1L</span>
+                                <span class="price-tag">R$8,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Coca 1,5L Normal</span>
+                                <span class="price-tag">R$10,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Coca 1,5L Zero</span>
+                                <span class="price-tag">R$10,99</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Cervejas -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <h4 class="text-xl font-bold mb-4 text-center">CERVEJAS</h4>
+                        <ul class="space-y-4">
+                            <li class="flex justify-between items-center">
+                                <span>Heineken Long Neck</span>
+                                <span class="price-tag">R$9,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Budweiser</span>
+                                <span class="price-tag">R$7,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Stella</span>
+                                <span class="price-tag">R$8,99</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Outras Bebidas -->
+                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+                        <h4 class="text-xl font-bold mb-4 text-center">OUTRAS BEBIDAS</h4>
+                        <ul class="space-y-4">
+                            <li class="flex justify-between items-center">
+                                <span>H2O Limoneto 500ml</span>
+                                <span class="price-tag">R$6,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Água com Gás</span>
+                                <span class="price-tag">R$2,49</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Água sem Gás</span>
+                                <span class="price-tag">R$1,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Suco</span>
+                                <span class="price-tag">R$5,99</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span>Suco com Leite</span>
+                                <span class="price-tag">R$6,99</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Extras Section -->
+            <div class="mt-16">
+                <h3 class="text-3xl font-display mb-8 text-center text-burntorange border-b border-burntorange/30 pb-2 inline-block">ADICIONAIS</h3>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="bg-graphite p-4 rounded-lg text-center">
+                        <p class="font-bold">Bacon</p>
+                        <span class="price-tag">R$2,99</span>
+                        <button class="add-to-cart mt-2 w-full bg-burntorange text-deepblack py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                                data-name="ADICIONAL: Bacon" 
+                                data-price="2.99">
+                            Adicionar
+                        </button>
+                    </div>
+                    <div class="bg-graphite p-4 rounded-lg text-center">
+                        <p class="font-bold">Catupiry</p>
+                        <span class="price-tag">R$2,99</span>
+                        <button class="add-to-cart mt-2 w-full bg-burntorange text-deepblack py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                                data-name="ADICIONAL: Catupiry" 
+                                data-price="2.99">
+                            Adicionar
+                        </button>
+                    </div>
+                    <div class="bg-graphite p-4 rounded-lg text-center">
+                        <p class="font-bold">Cheddar</p>
+                        <span class="price-tag">R$2,99</span>
+                        <button class="add-to-cart mt-2 w-full bg-burntorange text-deepblack py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                                data-name="ADICIONAL: Cheddar" 
+                                data-price="2.99">
+                            Adicionar
+                        </button>
+                    </div>
+                    <div class="bg-graphite p-4 rounded-lg text-center">
+                        <p class="font-bold">Barbecue</p>
+                        <span class="price-tag">R$2,99</span>
+                        <button class="add-to-cart mt-2 w-full bg-burntorange text-deepblack py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                                data-name="ADICIONAL: Barbecue" 
+                                data-price="2.99">
+                            Adicionar
+                        </button>
+                    </div>
+                    <div class="bg-graphite p-4 rounded-lg text-center">
+                        <p class="font-bold">Especial</p>
+                        <span class="price-tag">R$2,99</span>
+                        <button class="add-to-cart mt-2 w-full bg-burntorange text-deepblack py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                                data-name="ADICIONAL: Especial" 
+                                data-price="2.99">
+                            Adicionar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-graphite text-snowwhite">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+                    <img src="https://images.unsplash.com/photo-1559844484-e3b708a3619f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="DedeDogBurger" class="rounded-lg shadow-xl w-full border-4 border-burntorange">
+                </div>
+                <div class="md:w-1/2">
+                    <h2 class="text-4xl font-display mb-6 text-goldyellow">SOBRE NÓS</h2>
+                    <p class="mb-4">O DedeDogBurger nasceu da paixão por hambúrgueres artesanais e cachorros-quentes gourmet. Nossa missão é oferecer produtos de alta qualidade, com ingredientes selecionados e preparo artesanal.</p>
+                    <p class="mb-4">Nossos smash burgers são feitos com carne 100% bovina, moída na hora e grelhados no estilo smash (prensados), garantindo aquela crosta crocante por fora e suculência por dentro.</p>
+                    <p class="mb-6">Os cachorros-quentes são preparados com pão especial e combinações criativas de ingredientes, sempre com muito sabor e qualidade.</p>
+                    <div class="bg-burntorange/90 inline-block px-6 py-3 rounded-full">
+                        <p class="text-lg font-semibold text-deepblack">🕰️ Aberto de Quarta a Domingo, das 17:00 às 23:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-16 bg-deepblack">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-display text-center mb-12 section-title text-goldyellow">NOSSA GALERIA</h2>
+            
+            <div class="instagram-feed mb-8">
+                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Smash Burger" class="aspect-square rounded-lg object-cover">
+                <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Cheese Burger" class="aspect-square rounded-lg object-cover">
+                <img src="https://images.unsplash.com/photo-1559844484-e3b708a3619f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Bacon Burger" class="aspect-square rounded-lg object-cover">
+                <img src="https://images.unsplash.com/photo-1603064752734-4c48eff53d05?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Hot Dog" class="aspect-square rounded-lg object-cover">
+                <img src="https://images.unsplash.com/photo-1611270631114-e8552b66fcf3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Special Burger" class="aspect-square rounded-lg object-cover">
+                <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Burger Combo" class="aspect-square rounded-lg object-cover">
+            </div>
+            
+            <div class="text-center">
+                <a href="https://www.instagram.com/dededogburger" target="_blank" class="bg-gradient-to-r from-burntorange to-goldyellow text-deepblack px-8 py-3 rounded-full font-bold hover:opacity-90 transition inline-flex items-center">
+                    <i class="fab fa-instagram mr-2"></i> Siga-nos no Instagram
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-graphite">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row">
+                <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+                    <h2 class="text-4xl font-display mb-6 text-goldyellow">CONTATO & LOCALIZAÇÃO</h2>
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold mb-2 flex items-center text-burntorange">
+                            <i class="fas fa-map-marker-alt mr-2"></i> Endereço
+                        </h3>
+                        <p>📍 Jardim Piedade - Jaboatão/PE</p>
+                    </div>
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold mb-2 flex items-center text-burntorange">
+                            <i class="fas fa-clock mr-2"></i> Horário de Funcionamento
+                        </h3>
+                        <p>🕰️ Quarta a Domingo - 17:00 às 23:00</p>
+                    </div>
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold mb-2 flex items-center text-burntorange">
+                            <i class="fas fa-phone-alt mr-2"></i> Telefone
+                        </h3>
+                        <p>(81) 99999-9999</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2 flex items-center text-burntorange">
+                            <i class="fas fa-hashtag mr-2"></i> Redes Sociais
+                        </h3>
+                        <div class="flex space-x-4">
+                            <a href="https://www.instagram.com/dededogburger" target="_blank" class="bg-burntorange text-deepblack p-3 rounded-full hover:bg-goldyellow transition">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="bg-burntorange text-deepblack p-3 rounded-full hover:bg-goldyellow transition">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            <a href="#" class="bg-burntorange text-deepblack p-3 rounded-full hover:bg-goldyellow transition">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="bg-deepblack p-4 rounded-lg h-full border-2 border-burntorange/30">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3950.375389756345!2d-34.92382392474819!3d-8.06387398053211!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7ab1995a3c5d5d9%3A0x4e92e9d3b8a1a1!2sJardim%20Piedade%2C%20Jaboat%C3%A3o%20dos%20Guararapes%20-%20PE!5e0!3m2!1spt-BR!2sbr!4v1689876543210" width="100%" height="100%" style="border:0; min-height: 300px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="rounded-lg"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WhatsApp Float Button -->
+    <a href="#" class="fixed bottom-20 right-4 bg-green-500 text-white p-3 rounded-full shadow-xl floating-button md:bottom-8 md:right-8 md:p-4">
+        <i class="fab fa-whatsapp text-2xl"></i>
+    </a>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-deepblack text-goldyellow shadow-lg z-50 border-t border-burntorange/30">
+        <div class="flex justify-around items-center py-3">
+            <a href="#home" class="flex flex-col items-center text-xs">
+                <i class="fas fa-home text-xl mb-1"></i>
+                <span>Início</span>
+            </a>
+            <a href="#menu" class="flex flex-col items-center text-xs">
+                <i class="fas fa-utensils text-xl mb-1"></i>
+                <span>Cardápio</span>
+            </a>
+            <a href="#gallery" class="flex flex-col items-center text-xs">
+                <i class="fas fa-images text-xl mb-1"></i>
+                <span>Fotos</span>
+            </a>
+            <a href="#contact" class="flex flex-col items-center text-xs">
+                <i class="fas fa-map-marker-alt text-xl mb-1"></i>
+                <span>Localização</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-deepblack text-snowwhite py-8 border-t border-burntorange/30">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex justify-center mb-4">
+                <img src="https://via.placeholder.com/50x50" alt="DedeDogBurger Logo" class="h-12 w-12 rounded-full border-2 border-burntorange">
+            </div>
+            <p class="mb-4">🍔 Burgers Artesanais |  🌭 Cachorro Quente Especial</p>
+            <p class="text-burntorange mb-4">🕰️ Quarta-Domingo 17:00-23:00 |  📍 Jardim Piedade - Jaboatão/PE</p>
+            <p class="text-sm text-snowwhite/70">© 2023 DedeDogBurger. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Carrinho de Compras
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos do DOM
+            const cartToggle = document.getElementById('cart-toggle');
+            const closeCart = document.getElementById('close-cart');
+            const cartPanel = document.getElementById('cart-panel');
+            const cartOverlay = document.getElementById('cart-overlay');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartSubtotal = document.getElementById('cart-subtotal');
+            const cartTotal = document.getElementById('cart-total');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const cartCount = document.getElementById('cart-count');
+            
+            // Taxa de entrega
+            const deliveryFee = 5.00;
+            document.getElementById('delivery-fee').textContent = `R$ ${deliveryFee.toFixed(2).replace('.', ',')}`;
+            
+            // Carrinho
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            // Atualizar contador do carrinho
+            function updateCartCount() {
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                cartCount.textContent = totalItems;
+                cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
+            }
+            
+            // Atualizar carrinho
+            function updateCart() {
+                // Limpar carrinho
+                cartItemsContainer.innerHTML = '';
+                
+                if (cart.length === 0) {
+                    cartItemsContainer.innerHTML = '<p class="text-center py-4">Seu carrinho está vazio</p>';
+                    cartSubtotal.textContent = 'R$ 0,00';
+                    cartTotal.textContent = `R$ ${deliveryFee.toFixed(2).replace('.', ',')}`;
+                    return;
+                }
+                
+                // Calcular subtotal
+                const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                const total = subtotal + deliveryFee;
+                
+                cartSubtotal.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+                cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+                
+                // Adicionar itens ao carrinho
+                cart.forEach((item, index) => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'flex justify-between items-center py-3 border-b border-burntorange/10';
+                    cartItem.innerHTML = `
+                        <div class="flex-1">
+                            <h4 class="font-bold">${item.name}</h4>
+                            <div class="flex items-center mt-1">
+                                <button class="decrease-quantity text-burntorange hover:text-goldyellow" data-index="${index}">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" min="1" value="${item.quantity}" class="cart-item-quantity mx-2" data-index="${index}">
+                                <button class="increase-quantity text-burntorange hover:text-goldyellow" data-index="${index}">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p>R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</p>
+                            <button class="remove-item text-sm mt-1" data-index="${index}">Remover</button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(cartItem);
+                });
+                
+                // Adicionar eventos aos botões de quantidade
+                document.querySelectorAll('.decrease-quantity').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        if (cart[index].quantity > 1) {
+                            cart[index].quantity--;
+                            saveCart();
+                            updateCart();
+                        }
+                    });
+                });
+                
+                document.querySelectorAll('.increase-quantity').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        cart[index].quantity++;
+                        saveCart();
+                        updateCart();
+                    });
+                });
+                
+                document.querySelectorAll('.cart-item-quantity').forEach(input => {
+                    input.addEventListener('change', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const newQuantity = parseInt(this.value);
+                        if (newQuantity > 0) {
+                            cart[index].quantity = newQuantity;
+                            saveCart();
+                            updateCart();
+                        } else {
+                            this.value = cart[index].quantity;
+                        }
+                    });
+                });
+                
+                document.querySelectorAll('.remove-item').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        cart.splice(index, 1);
+                        saveCart();
+                        updateCart();
+                        updateCartCount();
+                    });
+                });
+            }
+            
+            // Salvar carrinho no localStorage
+            function saveCart() {
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartCount();
+            }
+            
+            // Adicionar item ao carrinho
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function() {
+                    const name = this.getAttribute('data-name');
+                    const price = parseFloat(this.getAttribute('data-price'));
+                    
+                    // Verificar se o item já está no carrinho
+                    const existingItem = cart.find(item => item.name === name);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        cart.push({
+                            name: name,
+                            price: price,
+                            quantity: 1
+                        });
+                    }
+                    
+                    saveCart();
+                    updateCart();
+                    
+                    // Feedback visual
+                    this.textContent = 'Adicionado!';
+                    this.classList.remove('bg-burntorange');
+                    this.classList.add('bg-green-500');
+                    
+                    setTimeout(() => {
+                        this.textContent = 'Adicionar ao Carrinho';
+                        this.classList.remove('bg-green-500');
+                        this.classList.add('bg-burntorange');
+                    }, 1000);
+                });
+            });
+            
+            // Finalizar pedido
+            checkoutBtn.addEventListener('click', function() {
+                const name = document.getElementById('customer-name').value.trim();
+                const phone = document.getElementById('customer-phone').value.trim();
+                const address = document.getElementById('customer-address').value.trim();
+                const notes = document.getElementById('customer-notes').value.trim();
+                
+                if (!name || !phone || !address) {
+                    alert('Por favor, preencha seu nome, telefone e endereço para continuar.');
+                    return;
+                }
+                
+                if (cart.length === 0) {
+                    alert('Seu carrinho está vazio. Adicione itens antes de finalizar o pedido.');
+                    return;
+                }
+                
+                // Calcular totais
+                const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                const total = subtotal + deliveryFee;
+                
+                // Criar mensagem para WhatsApp
+                let message = `*Pedido DedeDogBurger*%0A%0A`;
+                message += `*Cliente:* ${name}%0A`;
+                message += `*Telefone:* ${phone}%0A`;
+                message += `*Endereço:* ${address}%0A`;
+                if (notes) {
+                    message += `*Observações:* ${notes}%0A`;
+                }
+                message += `%0A*Itens do Pedido:*%0A%0A`;
+                
+                cart.forEach(item => {
+                    message += `- ${item.name} (${item.quantity}x) - R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}%0A`;
+                });
+                
+                message += `%0A*Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}%0A`;
+                message += `*Taxa de entrega:* R$ ${deliveryFee.toFixed(2).replace('.', ',')}%0A`;
+                message += `*Total:* R$ ${total.toFixed(2).replace('.', ',')}%0A%0A`;
+                message += `*Obrigado pelo seu pedido!*`;
+                
+                // Abrir WhatsApp
+                window.open(`https://wa.me/5581999999999?text=${message}`, '_blank');
+                
+                // Limpar carrinho após pedido
+                cart = [];
+                saveCart();
+                updateCart();
+                updateCartCount();
+                
+                // Limpar formulário
+                document.getElementById('customer-name').value = '';
+                document.getElementById('customer-phone').value = '';
+                document.getElementById('customer-address').value = '';
+                document.getElementById('customer-notes').value = '';
+                
+                // Fechar carrinho
+                cartPanel.classList.remove('open');
+                cartOverlay.classList.remove('active');
+            });
+            
+            // Abrir/fechar carrinho
+            cartToggle.addEventListener('click', function() {
+                cartPanel.classList.add('open');
+                cartOverlay.classList.add('active');
+            });
+            
+            closeCart.addEventListener('click', function() {
+                cartPanel.classList.remove('open');
+                cartOverlay.classList.remove('active');
+            });
+            
+            cartOverlay.addEventListener('click', function() {
+                cartPanel.classList.remove('open');
+                cartOverlay.classList.remove('active');
+            });
+            
+            // Inicializar carrinho
+            updateCart();
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>
