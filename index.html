@@ -6,6 +6,8 @@
     <title>DedeDogBurger - Smash Burgers Artesanais</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Adicionando SDK do Mercado Pago -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -154,6 +156,103 @@
             outline: none;
             border-color: #F9D342;
         }
+
+        /* Estilos para o botão de pagamento */
+        .mercadopago-button {
+            background-color: #009ee3 !important;
+            border: none !important;
+            color: white !important;
+            padding: 12px 24px !important;
+            border-radius: 9999px !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin-top: 10px !important;
+            width: 100% !important;
+        }
+
+        .mercadopago-button:hover {
+            background-color: #007fba !important;
+            transform: translateY(-2px) !important;
+        }
+
+        /* Estilos para o container do checkout */
+        #mercadopago-checkout {
+            margin-top: 20px;
+        }
+
+        /* Modal de pagamento */
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .payment-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .payment-modal-content {
+            background-color: #0F0C0B;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid #F7921E;
+            position: relative;
+        }
+
+        .close-payment-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #F7921E;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .payment-options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .payment-option {
+            background-color: #2D2D2D;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            margin: 0 5px;
+            border: 1px solid transparent;
+        }
+
+        .payment-option:hover, .payment-option.active {
+            border-color: #F7921E;
+            background-color: #3D3D3D;
+        }
+
+        .payment-option i {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: #F7921E;
+        }
     </style>
 </head>
 <body class="bg-deepblack font-sans text-snowwhite">
@@ -161,7 +260,7 @@
     <header class="bg-deepblack text-snowwhite sticky top-0 z-50 shadow-md border-b border-burntorange/30">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center">
-                <img src="https://via.placeholder.com/50x50" alt="DedeDogBurger Logo" class="h-10 w-10 rounded-full mr-2 border-2 border-burntorange">
+                <img src="logo.png" alt="DedeDogBurger Logo" class="h-20- w-20 rounded-full mr-2 border-2 border-burntorange">
                 <h1 class="text-2xl font-display tracking-wider text-goldyellow">DEDEDOGBURGER</h1>
             </div>
             <nav class="hidden md:block">
@@ -219,9 +318,32 @@
                 <textarea id="customer-notes" rows="2" placeholder="Observações (opcional)"></textarea>
             </div>
             
+            <div class="payment-options mb-4">
+                <div class="payment-option active" data-payment="whatsapp">
+                    <i class="fab fa-whatsapp"></i>
+                    <p>WhatsApp</p>
+                </div>
+                <div class="payment-option" data-payment="mercadopago">
+                    <i class="fas fa-credit-card"></i>
+                    <p>Cartão/PIX</p>
+                </div>
+            </div>
+            
             <button id="checkout-btn" class="w-full bg-goldyellow text-deepblack py-3 rounded-full font-bold hover:bg-burntorange transition flex items-center justify-center">
                 <i class="fab fa-whatsapp mr-2"></i> Finalizar Pedido via WhatsApp
             </button>
+            
+            <div id="mercadopago-checkout" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Pagamento -->
+    <div id="payment-modal" class="payment-modal">
+        <div class="payment-modal-content">
+            <span class="close-payment-modal">&times;</span>
+            <h3 class="text-2xl font-bold mb-4 text-goldyellow">Pagamento com Mercado Pago</h3>
+            <div id="payment-result"></div>
+            <div id="mercadopago-payment"></div>
         </div>
     </div>
 
@@ -536,89 +658,201 @@
                 
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Refrigerantes -->
-                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
-                        <h4 class="text-xl font-bold mb-4 text-center">REFRIGERANTES</h4>
-                        <ul class="space-y-4">
-                            <li class="flex justify-between items-center">
-                                <span>Coca Cola 350ml</span>
-                                <span class="price-tag">R$5,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Coca Cola Zero 350ml</span>
-                                <span class="price-tag">R$5,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Guaraná Lata 350ml</span>
-                                <span class="price-tag">R$5,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Fanta Lata 350ml</span>
-                                <span class="price-tag">R$5,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Sprite Lata 350ml</span>
-                                <span class="price-tag">R$5,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Guaraná 1L</span>
-                                <span class="price-tag">R$8,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Coca 1,5L Normal</span>
-                                <span class="price-tag">R$10,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Coca 1,5L Zero</span>
-                                <span class="price-tag">R$10,99</span>
-                            </li>
-                        </ul>
-                    </div>
-                    
-                    <!-- Cervejas -->
-                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
-                        <h4 class="text-xl font-bold mb-4 text-center">CERVEJAS</h4>
-                        <ul class="space-y-4">
-                            <li class="flex justify-between items-center">
-                                <span>Heineken Long Neck</span>
-                                <span class="price-tag">R$9,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Budweiser</span>
-                                <span class="price-tag">R$7,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Stella</span>
-                                <span class="price-tag">R$8,99</span>
-                            </li>
-                        </ul>
-                    </div>
-                    
-                    <!-- Outras Bebidas -->
-                    <div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
-                        <h4 class="text-xl font-bold mb-4 text-center">OUTRAS BEBIDAS</h4>
-                        <ul class="space-y-4">
-                            <li class="flex justify-between items-center">
-                                <span>H2O Limoneto 500ml</span>
-                                <span class="price-tag">R$6,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Água com Gás</span>
-                                <span class="price-tag">R$2,49</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Água sem Gás</span>
-                                <span class="price-tag">R$1,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Suco</span>
-                                <span class="price-tag">R$5,99</span>
-                            </li>
-                            <li class="flex justify-between items-center">
-                                <span>Suco com Leite</span>
-                                <span class="price-tag">R$6,99</span>
-                            </li>
-                        </ul>
-                    </div>
+<div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+    <h4 class="text-xl font-bold mb-4 text-center">REFRIGERANTES</h4>
+    <ul class="space-y-4">
+        <li class="flex justify-between items-center">
+            <span>Coca Cola 350ml</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$5,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Coca Cola 350ml" 
+                        data-price="5.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Coca Cola Zero 350ml</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$5,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Coca Cola Zero 350ml" 
+                        data-price="5.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Guaraná Lata 350ml</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$5,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Guaraná Lata 350ml" 
+                        data-price="5.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Fanta Lata 350ml</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$5,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Fanta Lata 350ml" 
+                        data-price="5.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Sprite Lata 350ml</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$5,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Sprite Lata 350ml" 
+                        data-price="5.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Guaraná 1L</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$8,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Guaraná 1L" 
+                        data-price="8.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Coca 1,5L Normal</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$10,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Coca 1,5L Normal" 
+                        data-price="10.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Coca 1,5L Zero</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$10,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Coca 1,5L Zero" 
+                        data-price="10.99">
+                    +
+                </button>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<!-- Cervejas -->
+<div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+    <h4 class="text-xl font-bold mb-4 text-center">CERVEJAS</h4>
+    <ul class="space-y-4">
+        <li class="flex justify-between items-center">
+            <span>Heineken Long Neck</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$9,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Heineken Long Neck" 
+                        data-price="9.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Budweiser</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$7,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Budweiser" 
+                        data-price="7.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Stella</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$8,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Stella" 
+                        data-price="8.99">
+                    +
+                </button>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<!-- Outras Bebidas -->
+<div class="bg-graphite p-6 rounded-lg shadow-lg menu-item">
+    <h4 class="text-xl font-bold mb-4 text-center">OUTRAS BEBIDAS</h4>
+    <ul class="space-y-4">
+        <li class="flex justify-between items-center">
+            <span>H2O Limoneto 500ml</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$6,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="H2O Limoneto 500ml" 
+                        data-price="6.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Água com Gás</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$2,49</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Água com Gás" 
+                        data-price="2.49">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Água sem Gás</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$1,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Água sem Gás" 
+                        data-price="1.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Suco</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$5,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Suco" 
+                        data-price="5.99">
+                    +
+                </button>
+            </div>
+        </li>
+        <li class="flex justify-between items-center">
+            <span>Suco com Leite</span>
+            <div class="flex items-center">
+                <span class="price-tag mr-2">R$6,99</span>
+                <button class="add-to-cart bg-burntorange text-deepblack px-3 py-1 rounded-full font-bold hover:bg-goldyellow transition text-sm" 
+                        data-name="Suco com Leite" 
+                        data-price="6.99">
+                    +
+                </button>
+            </div>
+        </li>
+    </ul>
+</div>
                 </div>
             </div>
             
@@ -703,12 +937,10 @@
             <h2 class="text-4xl font-display text-center mb-12 section-title text-goldyellow">NOSSA GALERIA</h2>
             
             <div class="instagram-feed mb-8">
-                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Smash Burger" class="aspect-square rounded-lg object-cover">
-                <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Cheese Burger" class="aspect-square rounded-lg object-cover">
-                <img src="https://images.unsplash.com/photo-1559844484-e3b708a3619f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Bacon Burger" class="aspect-square rounded-lg object-cover">
-                <img src="https://images.unsplash.com/photo-1603064752734-4c48eff53d05?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Hot Dog" class="aspect-square rounded-lg object-cover">
-                <img src="https://images.unsplash.com/photo-1611270631114-e8552b66fcf3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Special Burger" class="aspect-square rounded-lg object-cover">
-                <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Burger Combo" class="aspect-square rounded-lg object-cover">
+                <img src="./Captura de tela 2025-07-14 005648.png" alt="Smash Burger" class="aspect-square rounded-lg object-cover">
+                <img src="./Captura de tela 2025-07-14 005713.png" alt="Cheese Burger" class="aspect-square rounded-lg object-cover">
+                <img src="./Captura de tela 2025-07-14 005755.png" alt="Bacon Burger" class="aspect-square rounded-lg object-cover">
+                <img src="./Captura de tela 2025-07-14 005808.png" alt="Hot Dog" class="aspect-square rounded-lg object-cover">
             </div>
             
             <div class="text-center">
@@ -762,7 +994,7 @@
                 </div>
                 <div class="md:w-1/2">
                     <div class="bg-deepblack p-4 rounded-lg h-full border-2 border-burntorange/30">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3950.375389756345!2d-34.92382392474819!3d-8.06387398053211!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7ab1995a3c5d5d9%3A0x4e92e9d3b8a1a1!2sJardim%20Piedade%2C%20Jaboat%C3%A3o%20dos%20Guararapes%20-%20PE!5e0!3m2!1spt-BR!2sbr!4v1689876543210" width="100%" height="100%" style="border:0; min-height: 300px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="rounded-lg"></iframe>
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3949.1865890091062!2d-34.92859112543967!3d-8.183950432049992!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7aae10aff299adb%3A0x5a5e5b0dcaf050dc!2sR.%20Hidrol%C3%A2ndia%2C%20222%20-%20Piedade%2C%20Jaboat%C3%A3o%20dos%20Guararapes%20-%20PE%2C%2054420-160!5e0!3m2!1spt-BR!2sbr!4v1752465001801!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0; min-height: 300px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="rounded-lg"></iframe>
                     </div>
                 </div>
             </div>
@@ -800,12 +1032,12 @@
     <footer class="bg-deepblack text-snowwhite py-8 border-t border-burntorange/30">
         <div class="container mx-auto px-4 text-center">
             <div class="flex justify-center mb-4">
-                <img src="https://via.placeholder.com/50x50" alt="DedeDogBurger Logo" class="h-12 w-12 rounded-full border-2 border-burntorange">
+                <img src="logo.png" alt="DedeDogBurger Logo" class="h-20 w-15 rounded-full border-2 border-burntorange">
             </div>
             <p class="mb-4">🍔 Burgers Artesanais |  🌭 Cachorro Quente Especial</p>
-            <p class="text-burntorange mb-4">🕰️ Quarta-Domingo 17:00-23:00 |  📍 Jardim Piedade - Jaboatão/PE</p>
+            <p class="text-burntorange mb-4">🕰️ Quarta-Domingo 17:00-23:00 |  📍 Jardim Piedade - Jaboatão/PE</p><br>
             <p class="text-sm text-snowwhite/70">© 2023 DedeDogBurger. Todos os direitos reservados.</p>
-        </div>
+        </div><br>
     </footer>
 
     <script>
@@ -838,6 +1070,11 @@
             const cartTotal = document.getElementById('cart-total');
             const checkoutBtn = document.getElementById('checkout-btn');
             const cartCount = document.getElementById('cart-count');
+            const paymentOptions = document.querySelectorAll('.payment-option');
+            const mercadopagoCheckout = document.getElementById('mercadopago-checkout');
+            const paymentModal = document.getElementById('payment-modal');
+            const closePaymentModal = document.querySelector('.close-payment-modal');
+            const paymentResult = document.getElementById('payment-result');
             
             // Taxa de entrega
             const deliveryFee = 5.00;
@@ -983,7 +1220,29 @@
                 });
             });
             
-            // Finalizar pedido
+            // Seleção de método de pagamento
+            paymentOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remover classe active de todas as opções
+                    paymentOptions.forEach(opt => opt.classList.remove('active'));
+                    
+                    // Adicionar classe active à opção selecionada
+                    this.classList.add('active');
+                    
+                    const paymentMethod = this.getAttribute('data-payment');
+                    
+                    if (paymentMethod === 'whatsapp') {
+                        checkoutBtn.style.display = 'flex';
+                        mercadopagoCheckout.style.display = 'none';
+                        checkoutBtn.innerHTML = '<i class="fab fa-whatsapp mr-2"></i> Finalizar Pedido via WhatsApp';
+                    } else if (paymentMethod === 'mercadopago') {
+                        checkoutBtn.style.display = 'none';
+                        mercadopagoCheckout.style.display = 'block';
+                    }
+                });
+            });
+            
+            // Finalizar pedido via WhatsApp
             checkoutBtn.addEventListener('click', function() {
                 const name = document.getElementById('customer-name').value.trim();
                 const phone = document.getElementById('customer-phone').value.trim();
@@ -1043,10 +1302,157 @@
                 cartOverlay.classList.remove('active');
             });
             
+            // Inicializar Mercado Pago
+            const mp = new MercadoPago('APP_USR-66abcc05-02bd-4701-947e-c2da27670fb6', {
+                locale: 'pt-BR'
+            });
+            
+            // Configurar botão de pagamento do Mercado Pago
+            function setupMercadoPagoButton(total) {
+                mercadopagoCheckout.innerHTML = '';
+                
+                const brickBuilder = mp.bricks();
+                
+                brickBuilder.create('wallet', 'mercadopago-checkout', {
+                    initialization: {
+                        preferenceId: '', // Será definido quando o usuário clicar para pagar
+                    },
+                    customization: {
+                        visual: {
+                            buttonBackground: '#F7921E',
+                            borderRadius: '9999px'
+                        }
+                    },
+                    callbacks: {
+                        onSubmit: () => {
+                            // Validar informações antes de criar a preferência
+                            const name = document.getElementById('customer-name').value.trim();
+                            const phone = document.getElementById('customer-phone').value.trim();
+                            const address = document.getElementById('customer-address').value.trim();
+                            
+                            if (!name || !phone || !address) {
+                                alert('Por favor, preencha seu nome, telefone e endereço para continuar.');
+                                return Promise.reject();
+                            }
+                            
+                            // Criar preferência de pagamento
+                            return createPreference(total)
+                                .then((preferenceId) => {
+                                    // Atualizar o preferenceId no brick
+                                    return { preferenceId: preferenceId };
+                                })
+                                .catch(error => {
+                                    console.error('Erro ao criar preferência:', error);
+                                    alert('Ocorreu um erro ao processar seu pagamento. Por favor, tente novamente.');
+                                    return Promise.reject();
+                                });
+                        },
+                        onReady: () => {
+                            // O brick está pronto
+                        },
+                        onError: (error) => {
+                            // callback chamado para todos os casos de erro do Brick
+                            console.error('Erro no brick:', error);
+                        }
+                    }
+                });
+            }
+            
+            // Criar preferência de pagamento
+            function createPreference(total) {
+                const name = document.getElementById('customer-name').value.trim();
+                const phone = document.getElementById('customer-phone').value.trim();
+                const address = document.getElementById('customer-address').value.trim();
+                const notes = document.getElementById('customer-notes').value.trim();
+                
+                // Criar descrição do pedido
+                let description = 'Pedido DedeDogBurger - Itens: ';
+                cart.forEach((item, index) => {
+                    if (index > 0) description += ', ';
+                    description += `${item.name} (${item.quantity}x)`;
+                });
+                
+                // Criar itens para a preferência
+                const items = cart.map(item => ({
+                    title: item.name,
+                    unit_price: parseFloat(item.price),
+                    quantity: parseInt(item.quantity),
+                }));
+                
+                // Adicionar taxa de entrega como um item adicional
+                items.push({
+                    title: 'Taxa de entrega',
+                    unit_price: parseFloat(deliveryFee),
+                    quantity: 1,
+                });
+                
+                const preferenceData = {
+                    items: items,
+                    payer: {
+                        name: name,
+                        phone: {
+                            area_code: phone.substring(0, 2),
+                            number: phone.substring(2),
+                        },
+                        address: {
+                            street_name: address.split(',')[0] || address,
+                            street_number: '',
+                            zip_code: '',
+                        },
+                        email: 'cliente@dededogburger.com', // Você pode adicionar um campo de email no formulário
+                    },
+                    payment_methods: {
+                        excluded_payment_types: [
+                            { id: 'atm' } // Excluir pagamentos em lotéricas
+                        ],
+                        installments: 1, // Número máximo de parcelas
+                    },
+                    external_reference: 'DD' + Date.now(), // Referência para seu sistema
+                    statement_descriptor: 'DEDEDOGBURGER',
+                    notification_url: 'https://seusite.com/notifications', // URL para receber notificações de pagamento
+                    back_urls: {
+                        success: 'https://seusite.com/success',
+                        pending: 'https://seusite.com/pending',
+                        failure: 'https://seusite.com/failure',
+                    },
+                    auto_return: 'approved',
+                };
+                
+                return new Promise((resolve, reject) => {
+                    fetch('https://api.mercadopago.com/checkout/preferences', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer APP_USR-66abcc05-02bd-4701-947e-c2da27670fb6'
+                        },
+                        body: JSON.stringify(preferenceData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            reject(data.error);
+                        } else {
+                            resolve(data.id);
+                        }
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+                });
+            }
+            
             // Abrir/fechar carrinho
             cartToggle.addEventListener('click', function() {
                 cartPanel.classList.add('open');
                 cartOverlay.classList.add('active');
+                
+                // Atualizar o botão do Mercado Pago quando o carrinho é aberto
+                const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                const total = subtotal + deliveryFee;
+                
+                if (total > deliveryFee) {
+                    setupMercadoPagoButton(total);
+                }
             });
             
             closeCart.addEventListener('click', function() {
@@ -1057,6 +1463,11 @@
             cartOverlay.addEventListener('click', function() {
                 cartPanel.classList.remove('open');
                 cartOverlay.classList.remove('active');
+            });
+            
+            // Fechar modal de pagamento
+            closePaymentModal.addEventListener('click', function() {
+                paymentModal.classList.remove('active');
             });
             
             // Inicializar carrinho
